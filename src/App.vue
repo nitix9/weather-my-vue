@@ -34,7 +34,7 @@
     </div>
   </div>
   <div v-if="!arrFilterDate">Загрузка...</div>
-  <div v-else>
+  <div v-else class="weather-cont">
     <div class="predicted-container" v-for="item,index of arrFilterDate" v-bind:key="index">
       <PredictedWeather :weather-predict="weather_predict??null" :index-weather="item" :get-degw="getWindDirection"/>
     </div>
@@ -116,6 +116,7 @@ export default {
 </script>
 
 <style>
+html,body{margin: 0;padding: 0;height: 100%;width: auto;}
 .weather-data__date{display: flex;margin: 0 auto;padding-top: 3%;}
 .weather-data__date h2{margin: 0;}
 .predicted-container{display: flex;justify-content: center; padding-top:1% ;}
@@ -141,7 +142,7 @@ body {
   border-radius: 30px;display: flex;align-items: flex-start;flex-direction: column;background-color:rgb(71, 172, 209);
 font-size: 1.2rem;width: 50vh;}
 .weather-cont {
-  color: white;display: flex;justify-content: center;padding-top: 1%;
+  color: white;display: flex;align-items: center;padding-top: 1%;flex-direction: column;
 }
 h1 {
   color: white;
@@ -150,4 +151,5 @@ p {
   color: white;
 }
 select{font-size: 1.2rem;border-radius:5px ;}
+@media (max-width: 600px) { .weather-data{width: 90vw;}}
 </style>
