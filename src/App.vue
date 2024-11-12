@@ -1,31 +1,36 @@
 <template>
-  <h1>Приложение погоды</h1>
+<div class='locale-changer'>
+<select @change="getValueLang(),getWeatherData(),getWeatherPredict()" v-model="$i18n.locale" id='select_lang'>
+  <option v-for="locale in $i18n.availableLocales" :key="`locale-${locale}`" :value="locale">{{ locale }}</option>
+</select>
+</div>
+  <h1>{{ $t('appName') }}</h1>
   <div class="city-chosen">
-    <p>выбранный город</p>
+    <p>{{ $t('cityChosen') }}</p>
   </div>
   <select @change="getWeatherData(),getWeatherPredict()" id="select_">
-    <option value="Нижний Тагил">Нижний Тагил</option>
-    <option value="Екатеринбург">Екатеринбург</option>
-    <option value="Москва">Москва</option>
+    <option value="Нижний Тагил">{{ $t('city1') }}</option>
+    <option value="Екатеринбург">{{ $t('city2') }}</option>
+    <option value="Москва">{{ $t('city3') }}</option>
   </select>
   <div class="load" v-if="!weather_data">
-    <p>Загрузка...</p>
+    <p>{{ $t('load') }}</p>
   </div>
   <div class="weather-cont" v-else>
     <div class="weather-data">
       <div class="weather-data__city-container">
-        <h2>Город - {{ weather_data.name }}</h2>
+        <h2>{{ $t('city') }} - {{ weather_data.name }}</h2>
       </div>
       <div class="weather-data__date">
-        <h2>Сегодня</h2>
+        <h2>{{ $t('day') }}</h2>
       </div>
       <div class="weather-data__weather-parameters">
         <p>
-          Температура: {{ weather_data.main.temp }} °C
+          {{ $t('temperature') }}: {{ weather_data.main.temp }} °C
         </p>
-        <p>Ветер: {{ weather_data.wind.speed }} м/с, {{ getWindDirection(weather_data.wind.deg) }}</p>
-        <p>Влажность: {{ weather_data.main.humidity }} %</p>
-        <p>Давление: {{ weather_data.main.pressure }} hPa</p>
+        <p>{{ $t('wind') }}: {{ weather_data.wind.speed }} м/с, {{ getWindDirection(weather_data.wind.deg) }}</p>
+        <p>{{ $t('humidity') }}: {{ weather_data.main.humidity }} %</p>
+        <p>{{ $t('pressure') }}: {{ weather_data.main.pressure }} hPa</p>
       </div>
       <div class="weather-data__description-container"><img
           :src="`https://openweathermap.org/img/wn/${weather_data.weather[0].icon}@2x.png`">
@@ -33,7 +38,7 @@
       </div>
     </div>
   </div>
-  <div v-if="!arrFilterDate">Загрузка...</div>
+  <div v-if="!arrFilterDate">{{ $t('load') }}</div>
   <div v-else class="weather-cont">
     <div class="predicted-container" v-for="item,index of arrFilterDate" v-bind:key="index">
       <PredictedWeather :weather-predict="weather_predict??null" :index-weather="item" :get-degw="getWindDirection"/>
@@ -43,6 +48,7 @@
 
 <script>
 import PredictedWeather from './components/PredictedWeather.vue';
+
 export default {
   name: "App",
   data() {
@@ -52,18 +58,20 @@ export default {
       weather_date:new Date(1730570400*1000),
       latlon:null,
       arrFilterDate:null,
+      selLang:null
     };
   },
   mounted() {
     this.getWeatherData();
     this.getWeatherPredict();
+    this.getValueLang();
   },
   methods: {
     getWeatherData() {
       let latLon = "lat=57.9194&lon=59.965";
       latLon = this.getValue();
       this.latlon=latLon;
-      let link = `https://api.openweathermap.org/data/2.5/weather?${latLon}&appid=bb57199299dbac295d19c2e303bfe470&units=metric&lang=ru`;
+      let link = `https://api.openweathermap.org/data/2.5/weather?${latLon}&appid=bb57199299dbac295d19c2e303bfe470&units=metric&lang=${ this.selLang??'ru' }`;
       console.log(link);
       fetch(link)
         .then((resp) => resp.json())
@@ -72,7 +80,7 @@ export default {
         });
     },
     getWeatherPredict() {
-            let linkPredict = `https://api.openweathermap.org/data/2.5/forecast?${this.latlon??"lat=57.9194&lon=59.965"}&appid=b92cabe8d54a8c11f45f761e5d5570cb&units=metric&lang=ru`;
+            let linkPredict = `https://api.openweathermap.org/data/2.5/forecast?${this.latlon??"lat=57.9194&lon=59.965"}&appid=b92cabe8d54a8c11f45f761e5d5570cb&units=metric&lang=${this.selLang??'ru' }`;
             console.log(linkPredict)
             fetch(linkPredict)
                 .then((resp) => resp.json())
@@ -81,6 +89,12 @@ export default {
                 })
                 .then(this.filterPredicted)
         },
+    getValueLang(){
+      let select = document.getElementById("select_lang");
+      let val=select.value;
+      this.selLang=val;
+      console.log(val);
+    },
     getValue() {
       let select = document.getElementById("select_");
       let getVal = select.value;
@@ -117,6 +131,7 @@ export default {
 
 <style>
 html,body{margin: 0;padding: 0;height: 100%;width: auto;}
+.locale-changer{display: flex; justify-content: flex-end;padding-top: 1%;padding-right:5% ;}
 .weather-data__date{display: flex;margin: 0 auto;padding-top: 3%;}
 .weather-data__date h2{margin: 0;}
 .predicted-container{display: flex;justify-content: center; padding-top:1% ;}
@@ -130,7 +145,6 @@ html,body{margin: 0;padding: 0;height: 100%;width: auto;}
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 .weather-data__description-container{display: flex;align-items: center;width:100%;justify-content: center;padding: 0;}
 .load{border:solid rgb(3, 129, 179);
